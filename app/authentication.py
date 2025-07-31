@@ -10,8 +10,8 @@ load_dotenv()
 
 class CognitoAuthManager:
     def __init__(self):
-        self.client_id = "7vjm7dikbn1srnc82l0o1u4pfd"
-        self.client = boto3.client("cognito-idp", region_name="ap-south-1")
+        self.client_id = "du26ieo2nhqavv9e50jmhjmfi"
+        self.client = boto3.client("cognito-idp", region_name="us-east-1")
 
     @staticmethod
     def is_valid_email(email):

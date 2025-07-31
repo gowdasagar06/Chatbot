@@ -8,7 +8,7 @@ from decimal import Decimal
 import collections.abc
 
 class ChatSessionManagerDynamoDB:
-    def __init__(self, table_name='Arena-ChatSessions', region_name='ap-south-1'):
+    def __init__(self, table_name='Arena-ChatSessions', region_name='us-east-1'):
         self.table_name = table_name
         self.dynamodb = boto3.resource('dynamodb', region_name=region_name)
         self.table = self.dynamodb.Table(table_name)
