@@ -1,0 +1,13 @@
+{
+  "Amazon-Titan-Lite": {
+    "id": "amazon.titan-text-lite-v1",
+    "key": "titan-text-lite",
+    "provider": "amazon"
+  },
+  "Amazon-Titan-Express": {
+    "id": "amazon.titan-text-express-v1",
+    "key": "titan-text-express",
+    "provider": "amazon"
+  }
+}
+
