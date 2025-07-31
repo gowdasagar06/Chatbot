@@ -2,8 +2,7 @@ import json, os
 import boto3
 import asyncio
 from langchain_aws import ChatBedrockConverse
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 
 class ModelStreamer:
     def __init__(self, config_path="config/model_config.json", region="us-east-1"):
@@ -19,7 +18,7 @@ class ModelStreamer:
         
     def get_history_per_model(self, chat_history, selected_model_keys):
         model_histories = {key: [] for key in selected_model_keys}
-        system_message = None
+        system_prompt_content = None
 
         for message in chat_history:
             role = message.get("role")
@@ -27,7 +26,8 @@ class ModelStreamer:
             responses = message.get("responses", {})
 
             if role == "system":
-                system_message = SystemMessage(content=content)
+                # Store system content but don't create SystemMessage
+                system_prompt_content = content
 
             elif role == "user":
                 human_msg = HumanMessage(content=content)
@@ -42,25 +42,43 @@ class ModelStreamer:
 
         return {
             key: {
-                "system_message": system_message,
+                "system_content": system_prompt_content,
                 "messages": model_histories[key]
             }
             for key in selected_model_keys
         }
 
-    def build_prompt(self, system_message, chat_history):
+    def build_messages_for_titan(self, system_content, chat_history):
+        """Build messages for Titan models (no system message support)"""
         try:
-            template = ChatPromptTemplate([
-                ("system", system_message),
-                ("placeholder", "{conversation}"),
-                MessagesPlaceholder(variable_name="conversation", optional=True)
-            ])
-            return template.invoke({"conversation": chat_history})
+            messages = []
+            
+            if system_content and chat_history:
+                # Get the first user message and combine with system prompt
+                first_message = chat_history[0]
+                if isinstance(first_message, HumanMessage):
+                    # Combine system prompt with first user message
+                    combined_content = f"{system_content}\n\nUser: {first_message.content}"
+                    messages.append(HumanMessage(content=combined_content))
+                    # Add the rest of the conversation
+                    messages.extend(chat_history[1:])
+                else:
+                    # If no user message to combine with, add system as instruction
+                    messages.append(HumanMessage(content=system_content))
+                    messages.extend(chat_history)
+            elif system_content:
+                # Only system content, no chat history
+                messages.append(HumanMessage(content=system_content))
+            else:
+                # No system content, just use chat history
+                messages = chat_history
+                
+            return messages
         except Exception as e:
-            print(f"Error creating prompt template: {e}")
-            return None
+            print(f"Error building messages for Titan: {e}")
+            return chat_history or []
 
-    async def invoke_model_streaming(self, model_id, prompt_value, temperature):
+    async def invoke_model_streaming(self, model_id, messages, temperature):
         try:
             llm = ChatBedrockConverse(
                 model_id=model_id,
@@ -68,8 +86,8 @@ class ModelStreamer:
                 temperature=temperature
             )
 
-            messages = prompt_value
-
+            print(f"➡ Invoking Titan model {model_id} with {len(messages)} messages")
+            
             for chunk in llm.stream(messages):
                 if hasattr(chunk, 'content') and chunk.content:
                     for content_item in chunk.content:
@@ -78,7 +96,7 @@ class ModelStreamer:
                             if text:
                                 yield text
         except Exception as e:
-            print(f"Error invoking model: {e}")
+            print(f"Error invoking model {model_id}: {e}")
             import traceback
             traceback.print_exc()
 
@@ -99,9 +117,14 @@ class ModelStreamer:
             key = model_info["key"]
             model_id = model_info["id"]
             history = history_by_model[key]["messages"]
-            print('➡ history:', history)
-            prompt = self.build_prompt(system_prompt, history)
-            gen = self.invoke_model_streaming(model_id, prompt, temperature)
+            system_content = history_by_model[key]["system_content"] or system_prompt
+            
+            print(f'➡ Processing {model_name} (ID: {model_id}) with history length: {len(history)}')
+            
+            # Build messages without system message support
+            messages = self.build_messages_for_titan(system_content, history)
+            
+            gen = self.invoke_model_streaming(model_id, messages, temperature)
             active_gens[model_name] = gen
 
         responses = {model_name: "" for model_name in selected_models}
@@ -127,4 +150,3 @@ class ModelStreamer:
                     del tasks[model_name]
 
         return responses
-

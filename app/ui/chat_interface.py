@@ -8,7 +8,7 @@ def render_chat_interface():
     streamer = ModelStreamer()
     session_handler = ChatSessionManagerDynamoDB()
     # Main chat interface
-    model_map = streamer.load_model_config("/home/ec2-user/Chatbot/config/model_config.json")
+    model_map = streamer.load_model_config("/home/ec2-user/chatbot/config/model_config.json")
     
     if not st.session_state.messages:
         st.markdown("""
