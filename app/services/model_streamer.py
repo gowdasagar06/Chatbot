@@ -6,7 +6,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 class ModelStreamer:
-    def __init__(self, config_path="config/model_config.json", region="ap-south-1"):
+    def __init__(self, config_path="config/model_config.json", region="us-east-1"):
         self.bedrock = boto3.client(service_name="bedrock-runtime", region_name=region)
         self.region = region
         self.model_map = self.load_model_config(config_path)
@@ -55,43 +55,28 @@ class ModelStreamer:
                 ("placeholder", "{conversation}"),
                 MessagesPlaceholder(variable_name="conversation", optional=True)
             ])
-            return template.invoke({"conversation": chat_history}).to_messages()
+            return template.invoke({"conversation": chat_history})
         except Exception as e:
             print(f"Error creating prompt template: {e}")
             return None
 
     async def invoke_model_streaming(self, model_id, prompt_value, temperature):
         try:
-            # Construct Titan-style payload
-            input_text = ""
-            for msg in prompt_value:
-                if isinstance(msg, HumanMessage):
-                    input_text += f"User: {msg.content}\n"
-                elif isinstance(msg, AIMessage):
-                    input_text += f"Assistant: {msg.content}\n"
-                elif isinstance(msg, SystemMessage):
-                    input_text += f"{msg.content}\n"
-            payload = {
-                "inputText": input_text,
-                "textGenerationConfig": {
-                    "temperature": temperature,
-                    "maxTokenCount": 512,
-                    "topP": 0.9,
-                    "stopSequences": ["\nUser:"]
-                }
-            }
-
-            response = self.bedrock.invoke_model(
-                body=json.dumps(payload),
-                modelId=model_id,
-                accept="application/json",
-                contentType="application/json"
+            llm = ChatBedrockConverse(
+                model_id=model_id,
+                region_name=self.region,
+                temperature=temperature
             )
 
-            result = json.loads(response['body'].read())
-            output_text = result.get("results", [{}])[0].get("outputText", "")
-            yield output_text
+            messages = prompt_value
 
+            for chunk in llm.stream(messages):
+                if hasattr(chunk, 'content') and chunk.content:
+                    for content_item in chunk.content:
+                        if isinstance(content_item, dict) and content_item.get('type') == 'text':
+                            text = content_item.get('text', '')
+                            if text:
+                                yield text
         except Exception as e:
             print(f"Error invoking model: {e}")
             import traceback
