@@ -1,13 +1,45 @@
 {
-  "Amazon-Titan-Lite": {
-    "id": "amazon.titan-text-lite-v1",
-    "key": "titan-text-lite",
-    "provider": "amazon"
+  "Nova Pro": {
+    "id": "amazon.nova-pro-v1",
+    "key": "nova-pro",
+    "provider": "Amazon",
+    "type": "text",
+    "quality": "high"
   },
-  "Amazon-Titan-Express": {
+  "Nova Premier": {
+    "id": "amazon.nova-premier-v1",
+    "key": "nova-premier",
+    "provider": "Amazon",
+    "type": "text",
+    "quality": "enterprise"
+  },
+  "Nova Lite": {
+    "id": "amazon.nova-lite-v1",
+    "key": "nova-lite",
+    "provider": "Amazon",
+    "type": "text",
+    "quality": "basic"
+  },
+  "Titan Text G1 - Premier": {
+    "id": "amazon.titan-text-premier-v1",
+    "key": "titan-premier",
+    "provider": "Amazon",
+    "type": "text",
+    "quality": "high"
+  },
+  "Titan Text G1 - Lite": {
+    "id": "amazon.titan-text-lite-v1",
+    "key": "titan-lite",
+    "provider": "Amazon",
+    "type": "text",
+    "quality": "low"
+  },
+  "Titan Text G1 - Express": {
     "id": "amazon.titan-text-express-v1",
-    "key": "titan-text-express",
-    "provider": "amazon"
+    "key": "titan-express",
+    "provider": "Amazon",
+    "type": "text",
+    "quality": "medium"
   }
 }
 
