@@ -29,106 +29,27 @@ class SidebarManager:
             elif st.session_state.sidebar_view == "Session History":
                 self._render_session_history()
 
-    # def _render_model_selection(self):
-    #     with st.expander("🤖 Model Selection", expanded=False):
-    #         model_checkboxes = {
-    #             "Amazon-Titan-Lite": st.checkbox("Amazon-Titan-Lite", value="Amazon-Titan-Lite" in st.session_state.selected_models),
-    #             "Amazon-Titan-Express": st.checkbox("Amazon-Titan-Express", value="Amazon-Titan-Express" in st.session_state.selected_models),
-    #             #"Amazon-Nova-Pro": st.checkbox("Amazon-Nova-Pro", value="Amazon-Nova-Pro" in st.session_state.selected_models),
-    #             # "Claude-4-Sonnet": st.checkbox("Claude-4-Sonnet", value="Claude-4-Sonnet" in st.session_state.selected_models),
-    #             # "DeepSeek-R1": st.checkbox("DeepSeek-R1", value="DeepSeek-R1" in st.session_state.selected_models),
-    #             # "Claude-4-Opus": st.checkbox("Claude-4-Opus", value="Claude-4-Opus" in st.session_state.selected_models),
-    #             # "Claude-3.5-Haiku": st.checkbox("Claude-3.5-Haiku", value="Claude-3.5-Haiku" in st.session_state.selected_models),
-    #         }
-
-    #         st.session_state.selected_models = [model for model, selected in model_checkboxes.items() if selected]
-    #         selected_count = len(st.session_state.selected_models)
-
-    #         # Set mode based on model count
-    #         st.session_state.arena_mode = selected_count >= 4
-    #         st.session_state.three_model_mode = selected_count == 3
-    #         st.session_state.two_model_mode = selected_count == 2
-    #         st.session_state.single_model_mode = selected_count == 1
-
-    #         if st.session_state.arena_mode:
-    #             st.success("Arena Mode Active")
-    #         elif selected_count > 0:
-    #             st.info(f"Selected Models: {', '.join(st.session_state.selected_models)}")
-    #         else:
-    #             st.warning("No model selected.")
-
     def _render_model_selection(self):
         with st.expander("🤖 Model Selection", expanded=False):
-            # Amazon model definitions from your dictionary
-            amazon_models = {
-                "Nova Pro": {
-                    "id": "amazon.nova-pro-v1",
-                    "key": "nova-pro",
-                    "provider": "Amazon",
-                    "type": "text",
-                    "quality": "high"
-                },
-                "Nova Premier": {
-                    "id": "amazon.nova-premier-v1",
-                    "key": "nova-premier",
-                    "provider": "Amazon",
-                    "type": "text",
-                    "quality": "enterprise"
-                },
-                "Nova Lite": {
-                    "id": "amazon.nova-lite-v1",
-                    "key": "nova-lite",
-                    "provider": "Amazon",
-                    "type": "text",
-                    "quality": "basic"
-                },
-                "Titan Text G1 - Premier": {
-                    "id": "amazon.titan-text-premier-v1",
-                    "key": "titan-premier",
-                    "provider": "Amazon",
-                    "type": "text",
-                    "quality": "high"
-                },
-                "Titan Text G1 - Lite": {
-                    "id": "amazon.titan-text-lite-v1",
-                    "key": "titan-lite",
-                    "provider": "Amazon",
-                    "type": "text",
-                    "quality": "low"
-                },
-                "Titan Text G1 - Express": {
-                    "id": "amazon.titan-text-express-v1",
-                    "key": "titan-express",
-                    "provider": "Amazon",
-                    "type": "text",
-                    "quality": "medium"
-                }
+            model_checkboxes = {
+                "Amazon-Titan-Lite": st.checkbox("Amazon-Titan-Lite", value="Amazon-Titan-Lite" in st.session_state.selected_models),
+                "Amazon-Titan-Express": st.checkbox("Amazon-Titan-Express", value="Amazon-Titan-Express" in st.session_state.selected_models),
+                #"Amazon-Nova-Pro": st.checkbox("Amazon-Nova-Pro", value="Amazon-Nova-Pro" in st.session_state.selected_models),
+                # "Claude-4-Sonnet": st.checkbox("Claude-4-Sonnet", value="Claude-4-Sonnet" in st.session_state.selected_models),
+                # "DeepSeek-R1": st.checkbox("DeepSeek-R1", value="DeepSeek-R1" in st.session_state.selected_models),
+                # "Claude-4-Opus": st.checkbox("Claude-4-Opus", value="Claude-4-Opus" in st.session_state.selected_models),
+                # "Claude-3.5-Haiku": st.checkbox("Claude-3.5-Haiku", value="Claude-3.5-Haiku" in st.session_state.selected_models),
             }
 
-            if "selected_models" not in st.session_state:
-                st.session_state.selected_models = []
-
-            model_checkboxes = {}
-
-            for label, config in amazon_models.items():
-                key = config["key"]
-                model_checkboxes[label] = st.checkbox(
-                    label,
-                    value=label in st.session_state.selected_models
-                )
-
-            st.session_state.selected_models = [
-                label for label, selected in model_checkboxes.items() if selected
-            ]
+            st.session_state.selected_models = [model for model, selected in model_checkboxes.items() if selected]
             selected_count = len(st.session_state.selected_models)
 
-            # Update mode flags
+            # Set mode based on model count
             st.session_state.arena_mode = selected_count >= 4
             st.session_state.three_model_mode = selected_count == 3
             st.session_state.two_model_mode = selected_count == 2
             st.session_state.single_model_mode = selected_count == 1
 
-            # Mode indicator messages
             if st.session_state.arena_mode:
                 st.success("Arena Mode Active")
             elif selected_count > 0:
